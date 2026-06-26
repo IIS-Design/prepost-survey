@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Finish · No Available Survey — Ipsos iSay</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="../assets/styles.css" rel="stylesheet">
+</head>
+<body>
+<div id="screen"></div>
+
+<template id="screen-content">
+  <div class="stage pt-5">
+    <div class="celebrate mb-4">
+      <img class="confetti" src="https://cdn.ipsosinteractive.com/deploy/PanelOne/resources/images/revamp/survey/anim-confetti.gif" aria-hidden="true" alt="">
+      <h3 class="d-flex align-items-center gap-3 mb-3"><span class="badge-check">__CHECK_BLUE__</span> Thank you for taking this survey</h3>
+      <div class="alert alert-primary text-center text-main mb-0">You earned __STAR__ <strong>3 points!</strong></div>
+    </div>
+    <p class="text-center mb-4">Keep an eye out for more surveys and visit our site to stay up-to-date with all things Ipsos iSay.</p>
+    <div class="text-center"><a class="btn btn-primary" href="#">Go to Dashboard</a></div>
+  </div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/partials.js"></script>
+<script>
+  const t = document.getElementById('screen-content');
+  t.innerHTML = t.innerHTML
+    .replace('__CHECK_BLUE__', ICON.checkBlue)
+    .replace(/__STAR__/g, ICON.star);
+  mountScreen({ balance: true, user: true });
+</script>
+</body>
+</html>

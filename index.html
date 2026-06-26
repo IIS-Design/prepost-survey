@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ipsos iSay — Post-survey Flow</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="assets/variables.css" rel="stylesheet">
+<style>
+  /* Navigator chrome, themed with the Ipsos design tokens (variables.css) */
+  :root{ --blue: var(--bg-primary-default); --navy: var(--text-main); --line: var(--stroke-default-minus-2); }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Inter",system-ui,sans-serif;color:var(--navy);background:#f6f7f9}
+  .layout{display:flex;min-height:100vh}
+  .side{
+    width:300px;flex:0 0 300px;background:#fff;border-right:1px solid var(--line);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  }
+  .side-head{padding:1.25rem 1.25rem .75rem;border-bottom:1px solid var(--line)}
+  .brand img{height:34px;width:auto;display:block}
+  .side-sub{font-size:.8rem;color:#8a909d;margin-top:.35rem}
+  .nav-list{overflow:auto;padding:.5rem;flex:1 1 auto}
+  .nav-item{
+    display:flex;gap:.6rem;align-items:flex-start;width:100%;text-align:left;
+    border:none;background:none;border-radius:8px;padding:.6rem .7rem;cursor:pointer;color:var(--navy);
+    font-size:.9rem;line-height:1.25;
+  }
+  .nav-item:hover{background:#f1f3f9}
+  .nav-item.active{background:var(--blue);color:#fff}
+  .nav-item .num{font-weight:800;opacity:.6;min-width:1.4rem}
+  .nav-item.active .num{opacity:.85}
+  .nav-item small{display:block;font-weight:400;opacity:.7;font-size:.75rem}
+  .stage-wrap{flex:1 1 auto;display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    display:flex;align-items:center;gap:.75rem;justify-content:space-between;
+    padding:.75rem 1rem;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;
+  }
+  .topbar .title{font-weight:700}
+  .topbar .btns{display:flex;gap:.5rem}
+  .tb-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.4rem .9rem;font-weight:600;cursor:pointer;color:var(--navy);font-size:.85rem}
+  .tb-btn:hover{background:#f1f3f9}
+  .tb-btn:disabled{opacity:.4;cursor:default}
+  .menu-toggle{display:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:.4rem .7rem;cursor:pointer;font-size:1.1rem}
+  .frame{flex:1 1 auto;width:100%;border:none;background:#fff}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20}
+  @media (max-width: 860px){
+    .side{position:fixed;left:0;top:0;z-index:30;transform:translateX(-100%);transition:transform .2s}
+    .side.open{transform:none}
+    .overlay.show{display:block}
+    .menu-toggle{display:inline-block}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side" id="side">
+    <div class="side-head">
+      <div class="brand"><img src="https://cdn.ipsosinteractive.com/deploy/PanelOne/resources/logos/ipsos_isay_logo.svg" alt="Ipsos iSay"></div>
+      <div class="side-sub">Post-survey screens · static flow</div>
+    </div>
+    <div class="nav-list" id="navList"></div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+
+  <div class="stage-wrap">
+    <div class="topbar">
+      <div class="d-flex align-items-center gap-2" style="min-width:0">
+        <button class="menu-toggle" id="menuBtn">&#9776;</button>
+        <div class="title text-truncate" id="curTitle">—</div>
+      </div>
+      <div class="btns">
+        <button class="tb-btn" id="prevBtn">&larr; Prev</button>
+        <button class="tb-btn" id="nextBtn">Next &rarr;</button>
+        <button class="tb-btn" id="openBtn" title="Open in new tab">Open &#8599;</button>
+      </div>
+    </div>
+    <iframe class="frame" id="frame" title="screen preview"></iframe>
+  </div>
+</div>
+
+<script>
+const screens = [
+  ["Complete", "Points · survey · profiling-ready", "screens/01-complete.html"],
+  ["Complete · Points, no profiling", "Banner + rating", "screens/02-complete-points-no-profiling.html"],
+  ["Complete · Points & profiling", "Banner + profile CTA + rating", "screens/03-complete-points-profiling.html"],
+  ["Complete · Survey & profiling", "Screening CHiPS", "screens/04-complete-survey-profiling.html"],
+  ["Quick Finish · Points & generic survey", "3 points + surveys", "screens/05-qf-points-generic.html"],
+  ["Quick Finish · No available survey", "3 points + profiling", "screens/06-qf-points-no-survey.html"],
+  ["Quick Finish · No points & generic", "Surveys + points bar", "screens/07-qf-no-points-generic.html"],
+  ["Member Warning Message", "Rushed / inconsistent", "screens/08-member-warning.html"],
+  ["This survey wasn't the right fit", "No points & profiling (101)", "screens/09-not-right-fit.html"],
+  ["Well, this is unexpected", "Sniff Out · Screening CHiPS", "screens/10-sniff-out-unexpected.html"],
+  ["We are sorry", "DEM · Error [5D01]", "screens/11-dem-error.html"],
+  ["One moment…", "Redirect · uploading answers", "screens/12-redirect-loading.html"],
+];
+
+const navList = document.getElementById('navList');
+const frame = document.getElementById('frame');
+const curTitle = document.getElementById('curTitle');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const openBtn = document.getElementById('openBtn');
+const side = document.getElementById('side');
+const overlay = document.getElementById('overlay');
+let idx = 0;
+
+screens.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.className = 'nav-item';
+  b.innerHTML = `<span class="num">${String(i+1).padStart(2,'0')}</span><span>${s[0]}<small>${s[1]}</small></span>`;
+  b.addEventListener('click', () => { go(i); closeMenu(); });
+  navList.appendChild(b);
+});
+
+function go(i){
+  idx = Math.max(0, Math.min(screens.length-1, i));
+  frame.src = screens[idx][2];
+  curTitle.textContent = `${String(idx+1).padStart(2,'0')} · ${screens[idx][0]}`;
+  [...navList.children].forEach((c,n)=>c.classList.toggle('active', n===idx));
+  prevBtn.disabled = idx===0;
+  nextBtn.disabled = idx===screens.length-1;
+  location.hash = idx+1;
+}
+function closeMenu(){ side.classList.remove('open'); overlay.classList.remove('show'); }
+
+prevBtn.onclick = () => go(idx-1);
+nextBtn.onclick = () => go(idx+1);
+openBtn.onclick = () => window.open(screens[idx][2], '_blank');
+document.getElementById('menuBtn').onclick = () => { side.classList.toggle('open'); overlay.classList.toggle('show'); };
+overlay.onclick = closeMenu;
+window.addEventListener('keydown', e => {
+  if(e.key==='ArrowLeft') go(idx-1);
+  if(e.key==='ArrowRight') go(idx+1);
+});
+
+const start = parseInt(location.hash.replace('#',''),10);
+go(Number.isFinite(start) && start>=1 ? start-1 : 0);
+</script>
+</body>
+</html>

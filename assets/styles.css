@@ -1,0 +1,99 @@
+/* ===========================================================
+   Ipsos iSay – Post-survey screens (static flow)
+
+   Styling layers (load order):
+     1. Bootstrap 5            — CDN (grid, components, utilities)
+     2. Font Awesome 6         — CDN (icons)
+     3. variables.css          — Ipsos design tokens (color)
+     4. overrides.css          — Bootstrap re-skin (look & feel, from astra)
+     5. this file              — only the minimal page-chrome glue that
+                                 Bootstrap + the override layer don't cover.
+   =========================================================== */
+
+@import "variables.css";
+@import "overrides.css";
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- Page shell ---------- */
+.screen-main {
+  flex: 1 0 auto;
+  width: 100%;
+  padding: 1.5rem 1rem 2rem;
+}
+.stage { max-width: 760px; margin: 0 auto; }
+
+/* ---------- Header chrome ---------- */
+.app-header { padding: 1.4rem 1.75rem 0.4rem; }
+.brand { display: inline-flex; align-items: center; text-decoration: none; line-height: 0; }
+.brand img { height: 38px; width: auto; display: block; }
+
+.header-meta {
+  display: flex; align-items: center; gap: 1.35rem;
+  justify-content: flex-end; flex-wrap: wrap;
+}
+.acct-balance { color: var(--text-muted); font-size: .95rem; white-space: nowrap; }
+.balance {
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-weight: 800; color: var(--text-main); font-size: 1.05rem;
+  padding-left: 1.35rem; position: relative;
+}
+.balance::before {  /* vertical divider */
+  content: ""; position: absolute; left: 0; top: -2px; bottom: -2px;
+  width: 1px; background: var(--stroke-default-minus-2);
+}
+.user {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-weight: 800; color: var(--text-main); white-space: nowrap;
+}
+.user .ico { color: var(--text-secondary-default); font-size: 1.25rem; line-height: 0; }
+
+/* ---------- Celebration confetti overlay (astra technique) ---------- */
+.celebrate { position: relative; }
+.celebrate .confetti {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; mix-blend-mode: multiply; pointer-events: none; z-index: 1;
+}
+.celebrate > :not(.confetti) { position: relative; z-index: 2; }
+
+/* ---------- Rating row ---------- */
+.stars-row { display: flex; justify-content: center; gap: .9rem; }
+.rate-star { display: flex; flex-direction: column; align-items: center; gap: .3rem; cursor: pointer; }
+.rate-star i { font-size: 2.8rem; color: var(--gray-200); transition: color .15s; }
+.rate-star span { color: var(--text-muted); font-size: .85rem; }
+.rate-star:hover i, .rate-star.on i { color: var(--text-warning-default); }
+
+/* ---------- Footer chrome ---------- */
+.app-footer {
+  flex-shrink: 0;
+  padding: 1.4rem 1.75rem 1.6rem;   /* same horizontal padding as .app-header */
+}
+.foot-logo { line-height: 0; }
+.foot-logo img { height: 26px; width: auto; display: block; }
+.foot-link { color: var(--text-muted) !important; font-weight: 600; font-size: .9rem; }
+.foot-help {
+  border: 1px solid var(--stroke-default-minus-2); border-radius: 6px; padding: .35rem .9rem;
+  color: var(--text-muted) !important; font-weight: 600; font-size: .9rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 575.98px) {
+  .app-header { padding: 1rem 1rem .25rem; }
+  .brand img { height: 30px; }
+  .header-meta { gap: .75rem; font-size: .85rem; }
+  .acct-balance { display: none; }            /* collapse label on small screens */
+  .balance { padding-left: 0; }
+  .balance::before { display: none; }
+  .stars-row { gap: .45rem; }
+  .rate-star i { font-size: 2.1rem; }
+  .app-footer { padding: 1.2rem 1rem; }
+}
