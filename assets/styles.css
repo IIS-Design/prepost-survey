@@ -19,9 +19,14 @@ body {
   margin: 0;
   background: var(--white);
   -webkit-font-smoothing: antialiased;
+}
+
+/* mountScreen() injects header + main + footer into #screen, so the
+   full-height flex column (sticky footer) must live here, not on <body>. */
+#screen {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
 /* ---------- Page shell ---------- */
@@ -29,6 +34,13 @@ body {
   flex: 1 0 auto;
   width: 100%;
   padding: 1.5rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+}
+/* Tablet/desktop: center content in the viewport between header and footer,
+   but only when the height allows it (tall content just flows and scrolls). */
+@media (min-width: 768px) {
+  .screen-main { justify-content: center; }
 }
 .stage { max-width: 760px; margin: 0 auto; }
 
@@ -44,7 +56,7 @@ body {
 .acct-balance { color: var(--text-muted); font-size: .95rem; white-space: nowrap; }
 .balance {
   display: inline-flex; align-items: center; gap: .4rem;
-  font-weight: 800; color: var(--text-main); font-size: 1.05rem;
+  font-weight: 700; color: var(--text-main); font-size: 1.05rem;
   padding-left: 1.35rem; position: relative;
 }
 .balance::before {  /* vertical divider */
@@ -53,9 +65,13 @@ body {
 }
 .user {
   display: inline-flex; align-items: center; gap: .5rem;
-  font-weight: 800; color: var(--text-main); white-space: nowrap;
+  font-weight: 700; color: var(--text-main); white-space: nowrap;
 }
 .user .ico { color: var(--text-secondary-default); font-size: 1.25rem; line-height: 0; }
+
+/* ---------- Completion seal (inline SVG badge) ---------- */
+.badge-check { flex: 0 0 auto; display: inline-flex; align-items: center; line-height: 0; }
+.badge-check svg { width: 1.15em; height: 1.15em; display: block; }
 
 /* ---------- Celebration confetti overlay (astra technique) ---------- */
 .celebrate { position: relative; }
@@ -65,12 +81,14 @@ body {
 }
 .celebrate > :not(.confetti) { position: relative; z-index: 2; }
 
-/* ---------- Rating row ---------- */
+/* ---------- Rating (accessible radiogroup) ---------- */
 .stars-row { display: flex; justify-content: center; gap: .9rem; }
 .rate-star { display: flex; flex-direction: column; align-items: center; gap: .3rem; cursor: pointer; }
 .rate-star i { font-size: 2.8rem; color: var(--gray-200); transition: color .15s; }
 .rate-star span { color: var(--text-muted); font-size: .85rem; }
-.rate-star:hover i, .rate-star.on i { color: var(--text-warning-default); }
+/* .lit is applied cumulatively (JS) on hover and on selection: 1..N light up */
+.rate-star.lit i { color: var(--text-warning-default); }
+.rate-star:focus-visible { outline: 2px solid var(--stroke-primary-default); outline-offset: 3px; border-radius: 8px; }
 
 /* ---------- Footer chrome ---------- */
 .app-footer {
@@ -79,14 +97,17 @@ body {
 }
 .foot-logo { line-height: 0; }
 .foot-logo img { height: 26px; width: auto; display: block; }
-.foot-link { color: var(--text-muted) !important; font-weight: 600; font-size: .9rem; }
+.foot-link { color: var(--text-muted) !important; font-weight: 700; font-size: .9rem; }
 .foot-help {
   border: 1px solid var(--stroke-default-minus-2); border-radius: 6px; padding: .35rem .9rem;
-  color: var(--text-muted) !important; font-weight: 600; font-size: .9rem;
+  color: var(--text-muted) !important; font-weight: 700; font-size: .9rem;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 575.98px) {
+/* ---------- Responsive ----------
+   Keep the compact "mobile" layout all the way up to the md breakpoint
+   (< 768px), matching where the content stops centering. This avoids the
+   cramped header (Account Balance + user wrapping) in the 576–768px range. */
+@media (max-width: 767.98px) {
   .app-header { padding: 1rem 1rem .25rem; }
   .brand img { height: 30px; }
   .header-meta { gap: .75rem; font-size: .85rem; }

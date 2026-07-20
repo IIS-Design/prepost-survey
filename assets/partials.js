@@ -15,10 +15,10 @@ function seal(colorVar) {
 }
 
 const ICON = {
-  star:       '<i class="fa-solid fa-star text-warning"></i>',
-  starHollow: '<i class="fa-solid fa-star text-main"></i>',
-  user:       '<i class="fa-solid fa-circle-user"></i>',
-  rateStar:   '<i class="fa-solid fa-star"></i>',
+  star:       '<i class="fa-solid fa-star text-warning" aria-hidden="true"></i>',
+  starHollow: '<i class="fa-solid fa-star text-main" aria-hidden="true"></i>',
+  user:       '<i class="fa-solid fa-circle-user" aria-hidden="true"></i>',
+  rateStar:   '<i class="fa-solid fa-star" aria-hidden="true"></i>',
   checkGreen: seal('--bg-success-default'),
   checkBlue:  seal('--bg-primary-default'),
 };
@@ -35,13 +35,9 @@ function header(opts = {}) {
     meta += `<span class="user"><span class="ico">${ICON.user}</span> Sebastian</span>`;
   }
   return `<header class="app-header">
-    <div class="container-xl px-0">
-      <div class="row align-items-center g-2">
-        <div class="col-6">
-          <a class="brand" href="../index.html"><img src="${LOGO_ISAY}" alt="Ipsos iSay"></a>
-        </div>
-        <div class="col-6"><div class="header-meta">${meta}</div></div>
-      </div>
+    <div class="container-xl px-0 d-flex justify-content-between align-items-center gap-3">
+      <a class="brand" href="../index.html"><img src="${LOGO_ISAY}" alt="Ipsos iSay"></a>
+      <div class="header-meta">${meta}</div>
     </div>
   </header>`;
 }
@@ -56,15 +52,15 @@ function footer() {
   </footer>`;
 }
 
-/* Reusable rating card */
+/* Reusable rating card — accessible radiogroup (keyboard + cumulative hover) */
 function rateCard() {
   let stars = '';
   for (let i = 1; i <= 5; i++) {
-    stars += `<div class="rate-star">${ICON.rateStar}<span>${i}</span></div>`;
+    stars += `<span class="rate-star" role="radio" aria-checked="false" aria-label="${i} star${i > 1 ? 's' : ''}" tabindex="${i === 1 ? '0' : '-1'}">${ICON.rateStar}<span>${i}</span></span>`;
   }
   return `<div class="panel-default p-4 text-center">
-    <h5 class="mb-3">Please rate the survey you just took</h5>
-    <div class="stars-row">${stars}</div>
+    <h5 class="mb-3" id="rate-title">Please rate the survey you just took</h5>
+    <div class="stars-row" role="radiogroup" aria-labelledby="rate-title">${stars}</div>
   </div>`;
 }
 
@@ -95,11 +91,35 @@ function mountScreen(opts = {}) {
     header(opts) +
     `<main class="screen-main"><div class="container-xl">${content}</div></main>` +
     footer();
-  // simple star rating interactivity
-  document.querySelectorAll('.stars-row').forEach(row => {
-    const stars = [...row.querySelectorAll('.rate-star')];
-    stars.forEach((s, i) => s.addEventListener('click', () => {
-      stars.forEach((x, j) => x.classList.toggle('on', j <= i));
-    }));
+  // Accessible star rating: click / hover (cumulative) / keyboard (radiogroup).
+  document.querySelectorAll('.stars-row').forEach(group => {
+    const stars = [...group.querySelectorAll('.rate-star')];
+    let selected = -1;
+    const paint = n => stars.forEach((s, j) => s.classList.toggle('lit', j <= n));
+    const select = i => {
+      selected = i;
+      stars.forEach((s, j) => {
+        s.setAttribute('aria-checked', j === i ? 'true' : 'false');
+        s.tabIndex = j === i ? 0 : -1;
+      });
+      paint(i);
+      stars[i].focus();
+    };
+    stars.forEach((star, i) => {
+      star.addEventListener('click', () => select(i));
+      star.addEventListener('mouseenter', () => paint(i));       // light 1..i on hover
+      star.addEventListener('keydown', e => {
+        let ni = null;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp')   ni = Math.min(stars.length - 1, i + 1);
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') ni = Math.max(0, i - 1);
+        else if (e.key === 'Home') ni = 0;
+        else if (e.key === 'End')  ni = stars.length - 1;
+        else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); select(i); return; }
+        else return;
+        e.preventDefault();
+        select(ni);
+      });
+    });
+    group.addEventListener('mouseleave', () => paint(selected)); // revert hover to selection
   });
 }
