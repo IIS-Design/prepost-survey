@@ -1,0 +1,17 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      packages: write
+
+    uses: IIS-Design/.github/.github/workflows/container-deploy.yml@main
+
+    with:
+      app: prepost-survey
+      container-port: 80
+      smoke-path: /prepost-survey/_health
